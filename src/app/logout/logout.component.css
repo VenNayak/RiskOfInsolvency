@@ -1,0 +1,4 @@
+a.dropdown-toggle, a.logout {
+  cursor: pointer;
+  user-select: none;
+}

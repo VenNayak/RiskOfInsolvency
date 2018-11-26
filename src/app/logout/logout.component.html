@@ -1,0 +1,9 @@
+<div class="dropdown logoutMenu">
+    <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+      <a class="dropdown-toggle" data-toggle="dropdown">{{loggedInUser}}</a>
+      <ul class="dropdown-menu dropdown-menu-right">
+        <li class="dropdown-item role"><a style='font-family:cursive; font-size:15px'>{{userRole}}</a></li>
+        <li class="dropdown-item"><hr></li>
+        <li class="dropdown-item"><a  href="#" (click)='logout()'><b>Logout</b></a></li>
+      </ul>
+</div>
