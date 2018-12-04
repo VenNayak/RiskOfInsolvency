@@ -3,8 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
-//import "rxjs/add/observable/of";
-import {of} from 'rxjs';
+import "rxjs/add/observable/of";
 
 @Injectable()
 export class LoginAuthenticationService {
@@ -18,6 +17,7 @@ export class LoginAuthenticationService {
     // API: POST /UserAuthentication
     public isUserAuthenticated(userInfo) : Observable<boolean>{
       console.log("Inside isUserAuthenticated function in authentication service");
+      /** uncomment when actually integrated **/
       // let headers = new HttpHeaders();
       // headers.append('Content-Type', 'application/json');
       // return this.http.post('/login/api/authentication', JSON.stringify(userInfo), { headers: headers })
@@ -37,24 +37,24 @@ export class LoginAuthenticationService {
         
       // });     
          
-          //unit test
+          //unit test -- to be commented after Node.JS integration
           this.isLoggedIn = true;
           if(userInfo.userId == "ABCELE1"){
                this.loggedInRole = "Shipper";
                this.authMessage = "success";
                this.loggedInUser = "ABCELE1";
-               return of(true);
+               return Observable.of(true);
           } 
           if(userInfo.userId == "DHLIND"){
                this.loggedInRole = "Forwarder";
                this.authMessage = "success";
                this.loggedInUser = "DHLIND";
-               return of(true);
+               return Observable.of(true);
           } else{
 
                this.isLoggedIn = false;
-              this.authMessage = "Invalid user Id"
-               return of(true);
+               this.authMessage = "Invalid user Id"
+               return Observable.of(true);
           }
           
     }

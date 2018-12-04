@@ -1,40 +1,56 @@
 <div align="center">
-	<h3>View Shipping Contract</h3>
+	<h3>View Bill of Lading</h3>
 </div>
 <div align="right"><app-logout></app-logout></div>
 <br/>
 	<br/>
 		<div class="applicationForm">
-			<form class="form-horizontal" [formGroup]="contractForm">
+			<form class="form-horizontal" [formGroup]="bolForm">
 				<fieldset disabled>
 					<!--section 1 -->
 					<div class="card">
 						<div class="card-header">
-							<span class='sectionHeaders'>Contract Details</span>
+							<span class='sectionHeaders'>Bill of Lading Summary</span>
       </div>
       <div class="card-body">     
-       <div formGroupName="shipperToForwarderContract">
+       <div formGroupName="billOfLading">
           <div class="form-group row">
             <div class="col-md-4" >
-              <label for="contractId" class="control-label" >Contract ID</label>
-              <input type="text" id="contractId" class="form-control" formControlName="contractId" readonly/>
+              <label for="billOfLadingId" class="control-label" >Bill of Lading ID</label>
+              <input type="text" id="billOfLadingId" class="form-control" formControlName="billOfLadingId" readonly/>
             </div>
             <div class="col-md-4" >
-              <label for="shipperName" class="control-label" >Shipper Name</label>
-              <input type="text" id="shipperName" class="form-control" formControlName="shipperName" readonly/>
+              <label for="forwarderId" class="control-label" >Forwarder ID</label>
+              <input type="text" id="forwarderId" class="form-control" formControlName="forwarderId" readonly/>
             </div>
             <div class="col-md-4" >
               <label for="shipperId" class="control-label">Shipper ID</label>
               <input type="text" id="shipperId" class="form-control" formControlName="shipperId" readonly/>
             </div>
-            <div class="col-md-4">
-              <label for="forwarderName" class="control-label">Freight Forwarder Name</label>
-              <input type="text" id="forwarderName" class="form-control" formControlName="forwarderName" />
+           <div class="col-md-4">
+              <label for="carrierAmount" class="control-label">Carrier Charges</label>
+                <div class="input-group">
+                <div class="input-group-prepend">
+                <span class="input-group-text">$</span></div>
+              <input type="text" id="carrierAmount" class="form-control" formControlName="carrierAmount" />
+              </div>
             </div>
             <div class="col-md-4">
-              <label for="forwarderId" class="control-label">Freight Forwarder ID</label>
-              <input type="text" id="forwarderId" class="form-control" formControlName="forwarderId" />
+              <label for="forwarderAmount" class="control-label">Forwarder Charges</label>
+                <div class="input-group">
+                <div class="input-group-prepend">
+                <span class="input-group-text">$</span></div>
+              <input type="text" id="forwarderAmount" class="form-control" formControlName="forwarderAmount" />
+              </div>
             </div>
+            <div class="col-md-4">
+                <label for="paymentType" class="control-label">Payment Type</label>
+                <select class="form-control" id="paymentType" formControlName="paymentType">
+                  <option>PREPAID</option>
+                  <option>POSTPAID</option>
+                </select>
+            </div>
+
           </div>
         </div>
       </div>
@@ -68,14 +84,7 @@
               <label for="mfgDate" class="control-label">Date of Manufacture</label>
               <input type="text" id="mfgDate" class="form-control" formControlName="mfgDate" />
             </div>
-            <div class="col-md-4">
-              <label for="payAmount" class="control-label">Payment Amount</label>
-                <div class="input-group">
-                <div class="input-group-prepend">
-                <span class="input-group-text">$</span></div>
-              <input type="text" id="payAmount" class="form-control" formControlName="payAmount" />
-              </div>
-            </div>
+
           </div>
         </div>
       </div>
@@ -85,13 +94,13 @@
     <!--section 3 -->
     <div class="card">
       <div class="card-header">
-        <span class='sectionHeaders'>Verify Shipper</span>
+        <span class='sectionHeaders'>Verify Carrier</span>
       </div>
       <div class="card-body">
-             <div *ngIf = "shipperVerified &&  shipperVerificationSuccess">
+             <div *ngIf = "carrierVerified &&  carrierVerificationSuccess">
                       <div class="row">
                           <div class="alert alert-success" role="alert">
-                                 <strong>Shipper verification is successful ! </strong>
+                                 <strong>Carrier verification is successful ! </strong>
                           </div>
                      </div>
                      <div class="row">
@@ -103,14 +112,14 @@
                       </div>
                      
             </div>
-            <div *ngIf = "shipperVerified &&  !shipperVerificationSuccess">
+            <div *ngIf = "carrierVerified &&  !carrierVerificationSuccess">
                       <div class="row">
                           <div class="alert alert-danger" role="alert">
-                                <strong> Shipper verification has failed on Blockchain ! </strong>
+                                <strong> Carrier verification has failed on Blockchain ! </strong>
                           </div>
                      </div>
             </div>
-          <div [hidden] = "shipperVerified && shipperVerificationSuccess">
+          <div [hidden] = "carrierVerified && carrierVerificationSuccess">
                   <div class="row"> 
                             <div class="col-md-4">  
                               <div class="custom-file">
@@ -120,7 +129,7 @@
                               </div>
                             </div>
                             <div class="col-md-4">
-                              <button type="button" class="btn btn-primary" (click)= "verifySignature()">Verify Shipper</button>
+                              <button type="button" class="btn btn-primary" (click)= "verifySignature()">Verify Carrier</button>
                             </div>
                    </div>
           </div>

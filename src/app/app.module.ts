@@ -16,6 +16,10 @@ import { FileUploadService } from './services/file-upload.service';
 import { ContractManagementService } from './services/contract-management.service';
 import { ViewShipperContractComponent } from './view-shipper-contract/view-shipper-contract.component';
 import { LogoutComponent } from './logout/logout.component';
+import { ForwarderComponent } from './forwarder/forwarder.component';
+import { CarrierComponent } from './carrier/carrier.component';
+import { ViewBillOfLadingComponent } from './view-bill-of-lading/view-bill-of-lading.component';
+import { ViewFWCarrierContractComponent } from './view-fwcarrier-contract/view-fwcarrier-contract.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +27,11 @@ import { LogoutComponent } from './logout/logout.component';
     ShipperComponent,
     LoginComponent,
     ViewShipperContractComponent,
-    LogoutComponent
+    LogoutComponent,
+    ForwarderComponent,
+    CarrierComponent,
+    ViewBillOfLadingComponent,
+    ViewFWCarrierContractComponent
   ],
   imports: [
     BrowserModule,

@@ -8,12 +8,10 @@ export class ShipperToForwarderContract {
     shipperName : string;
     shipperId : string;
     goods : Goods;
-    forwarderApproved : boolean;
+    forwarderApproved : string;
     shipperPaid : boolean;
     constructor() {
       this.shipperPaid = false;
-      this.forwarderApproved = false;
-
      }
   
   }
@@ -28,12 +26,11 @@ export class ShipperToForwarderContract {
     forwarderName :string;
     forwarderId : string;
     goods : Goods;
-    forwarderApproved : boolean;
-    carrierApproved : boolean;
+    forwarderApproved : string;
+    carrierApproved : string;
+    paymentType: string;
     constructor() {
-     this.forwarderApproved = false;
-      this.carrierApproved = false;
-
+            this.paymentType = "PREPAID";
      }
   
   }
@@ -44,10 +41,13 @@ export class ShipperToForwarderContract {
     carrierAmount : number;
     forwarderAmount : number;
     forwarderId : string;
+    carrierId : string;
+    shipperId : string;
     timestamp : string;
-    paymentStatus : string;
+    paymentType : string;
+    goods : Goods;
     constructor() { 
-        this.paymentStatus = "PREPAID";
+        this.paymentType = "PREPAID";
     }
   }
   

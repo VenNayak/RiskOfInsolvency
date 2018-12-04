@@ -1,5 +1,5 @@
 <div align="center">
-	<h3>View Shipping Contract</h3>
+	<h3>View Freight Forwarder & Carrier Contract</h3>
 </div>
 <div align="right"><app-logout></app-logout></div>
 <br/>
@@ -7,33 +7,36 @@
 		<div class="applicationForm">
 			<form class="form-horizontal" [formGroup]="contractForm">
 				<fieldset disabled>
-					<!--section 1 -->
-					<div class="card">
-						<div class="card-header">
-							<span class='sectionHeaders'>Contract Details</span>
+	 <!--section 1 -->
+    <div class="card">
+      <div class="card-header">
+        <span class='sectionHeaders'>Contract Details</span>
       </div>
       <div class="card-body">     
-       <div formGroupName="shipperToForwarderContract">
+       <div formGroupName="forwarderToCarrierContract">
           <div class="form-group row">
             <div class="col-md-4" >
-              <label for="contractId" class="control-label" >Contract ID</label>
-              <input type="text" id="contractId" class="form-control" formControlName="contractId" readonly/>
+              <label for="forwarderName" class="control-label" >Forwarder Name</label>
+              <input type="text" id="forwarderName" class="form-control" formControlName="forwarderName" readonly/>
             </div>
             <div class="col-md-4" >
-              <label for="shipperName" class="control-label" >Shipper Name</label>
-              <input type="text" id="shipperName" class="form-control" formControlName="shipperName" readonly/>
-            </div>
-            <div class="col-md-4" >
-              <label for="shipperId" class="control-label">Shipper ID</label>
-              <input type="text" id="shipperId" class="form-control" formControlName="shipperId" readonly/>
+              <label for="forwarderId" class="control-label">Forwarder ID</label>
+              <input type="text" id="forwarderId" class="form-control" formControlName="forwarderId" readonly/>
             </div>
             <div class="col-md-4">
-              <label for="forwarderName" class="control-label">Freight Forwarder Name</label>
-              <input type="text" id="forwarderName" class="form-control" formControlName="forwarderName" />
+              <label for="carrierName" class="control-label">Carrier Name</label>
+              <input type="text" id="carrierName" class="form-control" formControlName="carrierName" />
             </div>
             <div class="col-md-4">
-              <label for="forwarderId" class="control-label">Freight Forwarder ID</label>
-              <input type="text" id="forwarderId" class="form-control" formControlName="forwarderId" />
+              <label for="carrierId" class="control-label">Carrier ID</label>
+              <input type="text" id="carrierId" class="form-control" formControlName="carrierId" />
+            </div>
+            <div class="col-md-4">
+              <label for="paymentType" class="control-label">Payment Type</label>
+              <select class="form-control" id="paymentType" formControlName="paymentType">
+                <option>PREPAID</option>
+                <option>POSTPAID</option>
+              </select>
             </div>
           </div>
         </div>
@@ -85,13 +88,13 @@
     <!--section 3 -->
     <div class="card">
       <div class="card-header">
-        <span class='sectionHeaders'>Verify Shipper</span>
+        <span class='sectionHeaders'>Verify Freight Forwarder</span>
       </div>
       <div class="card-body">
-             <div *ngIf = "shipperVerified &&  shipperVerificationSuccess">
+             <div *ngIf = "forwarderVerified &&  forwarderVerificationSuccess">
                       <div class="row">
                           <div class="alert alert-success" role="alert">
-                                 <strong>Shipper verification is successful ! </strong>
+                                 <strong>Freight Forwarder verification is successful ! </strong>
                           </div>
                      </div>
                      <div class="row">
@@ -103,14 +106,14 @@
                       </div>
                      
             </div>
-            <div *ngIf = "shipperVerified &&  !shipperVerificationSuccess">
+            <div *ngIf = "forwarderVerified &&  !forwarderVerificationSuccess">
                       <div class="row">
                           <div class="alert alert-danger" role="alert">
-                                <strong> Shipper verification has failed on Blockchain ! </strong>
+                                <strong> Freight Forwarder verification has failed on Blockchain ! </strong>
                           </div>
                      </div>
             </div>
-          <div [hidden] = "shipperVerified && shipperVerificationSuccess">
+          <div [hidden] = "forwarderVerified && forwarderVerificationSuccess">
                   <div class="row"> 
                             <div class="col-md-4">  
                               <div class="custom-file">
@@ -120,7 +123,7 @@
                               </div>
                             </div>
                             <div class="col-md-4">
-                              <button type="button" class="btn btn-primary" (click)= "verifySignature()">Verify Shipper</button>
+                              <button type="button" class="btn btn-primary" (click)= "verifySignature()">Verify Freight Forwarder</button>
                             </div>
                    </div>
           </div>

@@ -44,8 +44,12 @@ export class LoginComponent implements OnInit {
               }
               else if(this.loginAuthService.getLoggedInRole() == "Forwarder"){
                 console.log("Inside Forwarder logged in role");
-                this.router.navigateByUrl('/ShipperContract');
-              }            
+                this.router.navigateByUrl('/CarrierContract');
+              }        
+              else if(this.loginAuthService.getLoggedInRole() == "Carrier"){
+                console.log("Inside Carrier logged in role");
+                this.router.navigateByUrl('/BillOfLading');
+              }    
             }else{
                 this.authMessage = this.loginAuthService.getAuthMessage();
             }

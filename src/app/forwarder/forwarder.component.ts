@@ -7,55 +7,58 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Params , Router} from '@angular/router'; 
 import { Location } from '@angular/common';
-import {ShipperToForwarderContract, Consignment,BillOfLading} from '../models/consignment';
+import { ForwarderToCarrierContract,Consignment,BillOfLading, ShipperToForwarderContract} from '../models/consignment';
 
 import { ContractManagementService } from '../services/contract-management.service';
 import { FileUploadService } from '../services/file-upload.service';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-  selector: 'app-shipper',
-  templateUrl: './shipper.component.html',
-  styleUrls: ['./shipper.component.css']
+  selector: 'app-forwarder',
+  templateUrl: './forwarder.component.html',
+  styleUrls: ['./forwarder.component.css']
 })
-export class ShipperComponent implements OnInit {
+export class ForwarderComponent implements OnInit {
 
-   private contractName : string = "Upload Contract";
+  private contractName : string = "Upload Contract";
    private dsName :string = "Upload digital signature";
    private contractForm: FormGroup;
    private contractFiles: Array<File> = [];
    private dsFiles: Array<File> = [];
    private enableUploadButton : boolean = false;
-   private contract : ShipperToForwarderContract;
+   private contract : ForwarderToCarrierContract;
    private submitSuccess : boolean =false;
    private contractUploadSucess : boolean = false;
    private contractUplloadMsg : string;
    private contractId : string;
    private view : string = "contract";
 
-
-   private noSearchResults : boolean = false;
-   private fetchComplete : boolean = true;
    private noSearchResultsBOL : boolean = false;
    private fetchCompleteBOL : boolean = true;
 
-   private shipperToForwarderContract : Array<ShipperToForwarderContract> = [] ;
-   private billOfLadingList : Array<BillOfLading> = [] ;
+   private noSearchResultsShipping : boolean = false;
+   private fetchCompleteShipping : boolean = true;
 
-   private shipperId = "ABCELE1";
-   private shipperName = "ABC electricals";
+
+   private billOfLadingList : Array<BillOfLading> = [] ;
+   private shipperToForwarderContracts : Array<ShipperToForwarderContract> = [] ;
+
+   private forwarderId = "DHLIND";
+   private forwarderName = "DHL India";
 
   constructor(private formBuilder: FormBuilder, private router : Router, 
     private route : ActivatedRoute, private location : Location, 
     private contractManagementService :ContractManagementService, 
     private fileUploadService : FileUploadService, private modalService: NgbModal) {       
           this.route.params.subscribe( params => {
-             console.log("Inside the route params shipper component" + JSON.stringify(params));
-                 if(params.view == "payments"){
-                      this.view = "payments";
-                 }else if(params.view == "bol"){
+             console.log("Inside the route params Forwarder component" + JSON.stringify(params));
+                 if(params.view == "bol"){
                      this.view = "bol";
-                 }else{
+                 }
+                 else if(params.view == "shipping"){
+                     this.view = "shipping";
+                 }
+                 else{
                      this.view = "contract";
                  }
               
@@ -66,8 +69,8 @@ export class ShipperComponent implements OnInit {
 
  ngOnInit() {
   this.createForm();
-  this.refreshPayments();
   this.refreshBillOfLadings();
+  this.refreshShippingContracts();
   }
 
   contractFileChange(event) {
@@ -118,6 +121,13 @@ createForm(){
   this.dsName = "Upload digital signature";
 
   this.contractForm = this.formBuilder.group({
+        forwarderToCarrierContract : this.formBuilder.group({
+              forwarderName : this.forwarderName,
+              forwarderId :this.forwarderId,
+              carrierName : '',
+              carrierId : '',
+              paymentType : ''
+        }),
         goods: this.formBuilder.group({
             goodsId: '',
             goodsType: '',
@@ -125,21 +135,16 @@ createForm(){
             quantity: '',
             mfgDate: '',
             payAmount : ''
-        }),
-        shipperToForwarderContract : this.formBuilder.group({
-              shipperId : this.shipperId,
-              shipperName :this.shipperName,
-              forwarderId : '',
-              forwarderName : ''
         })
+
       });
 
 }
 
   submitcontract(){
-    this.contractManagementService.createShipperToForwarderContract(this.contract).subscribe(
+    this.contractManagementService.createForwarderToCarrierContract(this.contract).subscribe(
           response => {
-              console.log("res received create contrct service" + JSON.stringify(response));
+              console.log("res received create contract service" + JSON.stringify(response));
                 if (response !=null && response.success==true) {
                    console.log("Inside submit contract success");
                   this.submitSuccess = true;
@@ -156,61 +161,56 @@ createForm(){
     );
   }
 
-  refreshPayments(){
-    this.contractManagementService.getShipperToForwarderContracts(this.shipperId, "Shipper").subscribe(
-          response => {
-              console.log("res received getShipperToForwarderContracts service call" + JSON.stringify(response));
-                if (response !=null && response.success==true) {
-                   console.log("Inside get shipper to forwarder contracts success");
-                  this.fetchComplete = true;
-                  if(response && response.contracts && response.contracts.length > 0 ){
-                      this.shipperToForwarderContract = response.contracts;
-                      this.noSearchResults = false;
-                  }else{
-                      this.shipperToForwarderContract=[];
-                      this.noSearchResults = true;
-                  }
-                  return true;
-                }
-          },
-                error => {
-                        console.error("Error getting shipper to forwarder contract details! " + JSON.stringify(error));
-            
-                        
-                }
-    );
-
-
-  }
-
     refreshBillOfLadings(){
-    this.contractManagementService.getBillOfLadings(this.shipperId, "Shipper").subscribe(
-          response => {
-              console.log("res received getBillOfLadings service call" + JSON.stringify(response));
-                if (response !=null && response.success==true) {
-                   console.log("Inside getBillOfLadings success");
-                  this.fetchCompleteBOL = true;
-                  if(response && response.bolList && response.bolList.length > 0 ){
-                      this.billOfLadingList = response.bolList;
-                      this.noSearchResultsBOL = false;
-                  }else{
-                      this.billOfLadingList=[];
-                      this.noSearchResultsBOL = true;
-                  }
-                  return true;
-                }
-          },
-                error => {
-                        console.error("Error getting shipper to BOL list details! " + JSON.stringify(error));
-            
-                        
-                }
-    );
+        this.contractManagementService.getBillOfLadings(this.forwarderId, "Forwarder").subscribe(
+              response => {
+                  console.log("res received getBillOfLadings service call" + JSON.stringify(response));
+                    if (response !=null && response.success==true) {
+                      console.log("Inside getBillOfLadings success");
+                      this.fetchCompleteBOL = true;
+                      if(response && response.bolList && response.bolList.length > 0 ){
+                          this.billOfLadingList = response.bolList;
+                          this.noSearchResultsBOL = false;
+                      }else{
+                          this.billOfLadingList=[];
+                          this.noSearchResultsBOL = true;
+                      }
+                      return true;
+                    }
+              },
+                    error => {
+                            console.error("Error getting shipper to BOL list details! " + JSON.stringify(error));
+                                        
+                    }
+        );
+
+   }
 
 
-  }
+   refreshShippingContracts(){
+        this.contractManagementService.getShipperToForwarderContracts(this.forwarderId, "Forwarder").subscribe(
+                    response => {
+                        console.log("res received getShipperToForwarderContracts service call" + JSON.stringify(response));
+                          if (response !=null && response.success==true) {
+                            console.log("Inside getShipperToForwarderContracts calls success");
+                            this.fetchCompleteShipping = true;
+                            if(response && response.contracts && response.contracts.length > 0 ){
+                                this.shipperToForwarderContracts = response.contracts;
+                                this.noSearchResultsShipping = false;
+                            }else{
+                                this.shipperToForwarderContracts=[];
+                                this.noSearchResultsShipping = true;
+                            }
+                            return true;
+                          }
+                    },
+                          error => {
+                                  console.error("Error getting Shipper to Forwarder Contracts list! " + JSON.stringify(error));
+                                              
+                          }
+              );
 
 
-  
+   }
 
 }

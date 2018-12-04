@@ -121,15 +121,17 @@ verifySignature(){
    
 
 }
-  dsFileChange(event) {
+
+dsFileChange(event) {
     this.dsFiles = <Array<File>>event.target.files;
     if(this.dsFiles.length > 0)
       this.dsName = this.dsFiles[0].name;
       else this.dsName = "Upload digital signature";
 }
-  goBack(){
+
+goBack(){
     this.modalService.dismissAll();
-    this.location.back();
+    this.router.navigate(['ShipperContract', 'payments']);
 
   }
 

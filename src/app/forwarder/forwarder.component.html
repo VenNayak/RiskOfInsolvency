@@ -1,5 +1,5 @@
 <div  align="center">
-  <h3>Shipping Contract Creation & Payment Management</h3>
+  <h3>Carrier Contract Creation & Bill of Ladings Management</h3>
 </div>
 <div align="right"><app-logout></app-logout></div>
 <br/><br/>
@@ -7,8 +7,8 @@
   <li class="nav-item">
     <a class="nav-link" data-toggle="tab" href="#createContract" [ngClass] = "{'show active' : view=='contract'}">Create Contract</a>
   </li>
-  <li class="nav-item">
-    <a class="nav-link" data-toggle="tab" href="#managePayments" (click) = "refreshPayments()" [ngClass] = "{'show active' : view=='payments'}" >Pending Payments</a>
+   <li class="nav-item">
+    <a class="nav-link" data-toggle="tab" href="#manageShipping" (click) = "refreshShippingContracts()" [ngClass] = "{'show active' : view=='shipping'}" >Pending Shipping Contracts</a>
   </li>
   <li class="nav-item">
     <a class="nav-link" data-toggle="tab" href="#manageBOL" (click) = "refreshBillOfLadings()" [ngClass] = "{'show active' : view=='bol'}" >Pending Bill of Ladings</a>
@@ -31,23 +31,30 @@
         <span class='sectionHeaders'>Contract Details</span>
       </div>
       <div class="card-body">     
-       <div formGroupName="shipperToForwarderContract">
+       <div formGroupName="forwarderToCarrierContract">
           <div class="form-group row">
             <div class="col-md-4" >
-              <label for="shipperName" class="control-label" >Shipper Name</label>
-              <input type="text" id="shipperName" class="form-control" formControlName="shipperName" readonly/>
+              <label for="forwarderName" class="control-label" >Forwarder Name</label>
+              <input type="text" id="forwarderName" class="form-control" formControlName="forwarderName" readonly/>
             </div>
             <div class="col-md-4" >
-              <label for="shipperId" class="control-label">Shipper ID</label>
-              <input type="text" id="shipperId" class="form-control" formControlName="shipperId" readonly/>
+              <label for="forwarderId" class="control-label">Forwarder ID</label>
+              <input type="text" id="forwarderId" class="form-control" formControlName="forwarderId" readonly/>
             </div>
             <div class="col-md-4">
-              <label for="forwarderName" class="control-label">Freight Forwarder Name</label>
-              <input type="text" id="forwarderName" class="form-control" formControlName="forwarderName" />
+              <label for="carrierName" class="control-label">Carrier Name</label>
+              <input type="text" id="carrierName" class="form-control" formControlName="carrierName" />
             </div>
             <div class="col-md-4">
-              <label for="forwarderId" class="control-label">Freight Forwarder ID</label>
-              <input type="text" id="forwarderId" class="form-control" formControlName="forwarderId" />
+              <label for="carrierId" class="control-label">Carrier ID</label>
+              <input type="text" id="carrierId" class="form-control" formControlName="carrierId" />
+            </div>
+            <div class="col-md-4">
+              <label for="paymentType" class="control-label">Payment Type</label>
+              <select class="form-control" id="paymentType" formControlName="paymentType">
+                <option>PREPAID</option>
+                <option>POSTPAID</option>
+              </select>
             </div>
           </div>
         </div>
@@ -146,9 +153,7 @@
       </div>
     </div>
     <br/>
-        
-       
-<ng-template #sysAlert let-modal>
+ <ng-template #sysAlert let-modal>
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">System Alert</h4>
     <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
@@ -165,13 +170,13 @@
     </div>
   </div>
 </ng-template>
-
-    </form>
+   </form>
     </div>
     </ng-template>
   </div>
+
 <ng-template #applicationSuccess>
-  <div class="alert alert-success"> <strong>Success!</strong>Contract has been created successfully and sent to the Freight forwarder for approval ! Contract ID is <strong> {{contractId}}</strong></div>
+  <div class="alert alert-success"> <strong>Success!</strong>Contract has been created successfully and sent to the Carrier  for approval ! Contract ID is <strong> {{contractId}}</strong></div>
   <div class="alert alert-info">
     Please click on <strong>Create Another</strong> create a new contract !
   </div>
@@ -179,30 +184,23 @@
     <button type="button" class="btn btn-primary" (click) = 'createForm()'>Create Another</button>
   </div>
 </ng-template>
-
-
-
-  <!-- tab pane 2 -->
-  <div id="managePayments" class="container tab-pane fade" [ngClass] = "{'show active' : view=='payments'}"><br>
-
-<div *ngIf= "fetchComplete" >
+  <!-- tab pane 2-->
+<div id="manageShipping" class="container tab-pane fade" [ngClass] = "{'show active' : view=='shipping'}"><br>
+<div *ngIf= "fetchCompleteShipping" >
 <table class="table table-striped">
   <thead>
       <tr>
-          <th>Contract Id</th>
-          <th>Freight Forwarder ID</th>
-          <th>Freight Forwarder Name</th>
+          <th>Shipping Contract ID</th>
+          <th>Shipper ID</th>
           <th>Goods Id</th>
           <th>Quantity</th>
-          <th>Payment Amount Due (USD)</th>
+          <th>Payment Amount(USD)</th>
       </tr>
   </thead>
   <tbody>
-
-      <tr *ngFor="let contract of shipperToForwarderContract">
+      <tr *ngFor="let contract of shipperToForwarderContracts">
           <td><a [routerLink] = "['/ViewShipperContract', contract.contractId]">{{contract.contractId}}</a></td>
-          <td>{{contract.forwarderId}}</td>
-          <td>{{contract.forwarderName}}</td>
+          <td>{{contract.shipperId}}</td>
           <td>{{contract.goods.goodsId}}</td>
           <td>{{contract.goods.quantity}}</td>
           <td>{{contract.payAmount}}</td>
@@ -210,11 +208,11 @@
 
   </tbody>
 </table> 
-
-<div *ngIf='noSearchResults' style='color:red;' align='center'><strong>No  results found !</strong></div>
+<div *ngIf='noSearchResultsShipping' style='color:red;' align='center'><strong>No  results found !</strong></div>
 </div>
 
 </div>
+
 
   <!-- tab pane 3 -->
 <div id="manageBOL" class="container tab-pane fade" [ngClass] = "{'show active' : view=='bol'}"><br>
@@ -224,22 +222,20 @@
       <tr>
           <th>Bill of Lading Id</th>
           <th>Freight Forwarder ID</th>
-          <th>Carrier ID</th>
           <th>Carrier Amount(USD)</th>
-          <th>Forwarder Amount(USD)</th>
           <th>Goods Id</th>
           <th>Quantity</th>
+          <th>Forwarder Amount(USD)</th>
       </tr>
   </thead>
   <tbody>
       <tr *ngFor="let bol of billOfLadingList">
           <td><a [routerLink] = "['/ViewBillOfLading', bol.billOFLadingId]">{{bol.billOFLadingId}}</a></td>
-          <td>{{bol.forwarderId}}</td>
           <td>{{bol.carrierId}}</td>
           <td>{{bol.carrierAmount}}</td>
-          <td>{{bol.forwarderAmount}}</td>
           <td>{{bol.goods.goodsId}}</td>
           <td>{{bol.goods.quantity}}</td>
+          <td>{{bol.forwarderAmount}}</td>
       </tr>
 
   </tbody>
