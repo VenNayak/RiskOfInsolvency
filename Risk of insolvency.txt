@@ -1,0 +1,855 @@
+namespace org.example.empty
+
+ 
+
+asset Contract identified by contractID {
+
+  o String contractData
+
+  o String contractID
+
+  o Double amount
+
+  o DateTime timestamp
+
+  }
+
+asset BillOfLading identified by billOfLadingID {
+
+  o String billOfLadingData
+
+  o String billOfLadingID
+
+  o Double carrier_amount
+
+  o Double forwarder_amount
+
+  o Status final_billOfLadingStatus default = "prepaid"
+
+  o DateTime timestamp
+
+}
+
+ 
+
+asset Goods identified by goodsID {
+
+  o String goodsID
+
+  o String goodsType
+
+  o String label
+
+  o String quantity
+
+  o DateTime mfdate 
+
+}
+
+ 
+
+asset StatusUpdate identified by ID{
+
+  o String ID
+
+  o String shipper_status
+
+  o String forwarder_status
+
+  o String carrier_status
+
+  o String bank_status 
+
+}
+
+ 
+
+enum Status {
+
+  o prepaid
+
+  o revise
+
+  o approved
+
+ 
+
+}
+
+participant Shipper identified by ID{
+
+  o String ID
+
+  o String name
+
+  o String location
+
+  o String billOfLadingStatus
+
+ 
+
+  }
+
+participant FreightForwarder extends Shipper{
+
+ 
+
+ 
+
+  }
+
+ 
+
+participant Carrier extends Shipper{
+
+ 
+
+  }
+
+participant Consignee extends Shipper{
+
+  }
+
+participant Bank extends Shipper{
+
+o Double total_funds
+
+  }
+
+transaction CreateContractShipper2Forwarder{
+
+  o Contract contract
+
+ 
+
+  -->Shipper shipper
+
+  -->FreightForwarder forwarder
+
+}
+
+transaction CreateContractForwarder2Carrier{
+
+  o Contract contract
+
+  -->FreightForwarder forwarder
+
+  -->Carrier carrier
+
+}
+
+transaction CreateBillOfLading{
+
+  o  BillOfLading billOfLading
+
+  -->Carrier carrier
+
+  }
+
+event invokecreateBillOfLAdingStatus{
+
+  o String message
+
+}
+
+event invokeApproveBillOfLAdingStatus{
+
+  o String message
+
+}
+
+transaction ApproveBillOfLading{ 
+
+  --> BillOfLading billOfLading
+
+  -->Shipper shipper
+
+  -->Carrier carrier
+
+  -->FreightForwarder forwarder
+
+  -->Bank bank
+
+}
+
+transaction depositAmount{ 
+
+  -->Contract contract
+
+  -->Shipper shipper
+
+  -->Bank bank
+
+}
+
+transaction payment{
+
+  -->BillOfLading billoflading
+
+  -->FreightForwarder forwarder
+
+  -->Carrier carrier
+
+  -->Bank bank
+
+}
+
+transaction CreateGoods{ 
+
+  o Goods goods
+
+  -->Shipper shipper
+
+}
+
+ 
+
+transaction updateBillOfLAdingStatus{
+
+  o String status
+
+  -->StatusUpdate statusupdate
+
+  -->Shipper shipper
+
+  -->Carrier carrier
+
+  -->FreightForwarder forwarder
+
+  -->Bank bank
+
+}
+
+ 
+
+transaction createBillOfLAdingStatus{
+
+  o StatusUpdate statusupdate
+
+  -->BillOfLading billOfLading 
+
+}
+
+ 
+
+ 
+
+Logic.js
+
+ 
+
+* Create Goods
+
+ 
+
+* @param {org.example.empty.CreateGoods} goodsData
+
+ 
+
+* @transaction
+
+ 
+
+*/
+
+function transactionCreateGoods(goodsData){
+
+  //console.log(goodsData.shipper);
+
+  var factory=getFactory();
+
+  var newRecord=factory.newResource('org.example.empty','Goods',goodsData.goods.goodsID);
+
+  
+
+          
+
+newRecord.goodsType=goodsData.goods.goodsType
+
+newRecord.label =goodsData.goods.label
+
+newRecord.quantity =goodsData.goods.quantity
+
+newRecord.mfdate =goodsData.goods.mfdate
+
+ 
+
+  return getAssetRegistry('org.example.empty.Goods')
+
+  .then(function(registry){
+
+    registry.add(newRecord);
+
+  });
+
+ 
+
+}
+
+ 
+
+/**
+
+ 
+
+* Create BillOfLading
+
+ 
+
+* @param {org.example.empty.CreateBillOfLading} tx
+
+ 
+
+* @transaction
+
+ 
+
+*/
+
+function transactionCreateBillOfLading(tx){
+
+ 
+
+  var factory=getFactory();
+
+  var newRecord=factory.newResource('org.example.empty','BillOfLading',tx.billOfLading.billOfLadingID);
+
+  
+
+          
+
+newRecord.billOfLadingData=tx.billOfLading.billOfLadingData;
+
+   newRecord.carrier_amount=tx.billOfLading.carrier_amount;
+
+   newRecord.forwarder_amount=tx.billOfLading.forwarder_amount;
+
+ 
+
+newRecord.final_billOfLadingStatus =tx.billOfLading.final_billOfLadingStatus;
+
+newRecord.timestamp =tx.billOfLading.timestamp;
+
+  
+
+   //console.log(tx.carrier);
+
+  return getAssetRegistry('org.example.empty.BillOfLading')
+
+  .then(function(registry){
+
+    registry.add(newRecord);
+
+  });
+
+   let basicevent=factory.newEvent('org.example.empty','invokecreateBillOfLAdingStatus');
+
+   basicevent.message= "call";
+
+   emit(basicevent);
+
+}
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+/**
+
+ 
+
+* Create Contract between Freight forwarder and Carrier
+
+ 
+
+* @param {org.example.empty.CreateContractForwarder2Carrier} txn
+
+ 
+
+* @transaction
+
+ 
+
+*/
+
+function transactionCreateContractForwarder2Carrier(txn){
+
+  console.log(txn);
+
+  var factory=getFactory();
+
+  var newRecord=factory.newResource('org.example.empty','Contract',txn.contract.contractID);
+
+  
+
+          
+
+newRecord.contractData=txn.contract.contractData;
+
+  // newRecord.amount=txn.contract.amount;
+
+ 
+
+ 
+
+newRecord.timestamp =txn.contract.timestamp;
+
+  
+
+  // console.log(txn.carrier);
+
+  // console.log(txn.forwarder);
+
+  return getAssetRegistry('org.example.empty.Contract')
+
+  .then(function(registry){
+
+    registry.add(newRecord);
+
+  });
+
+}
+
+ 
+
+ 
+
+ 
+
+/**
+
+ 
+
+* Create Contract between Shipper and Freight forwarder
+
+ 
+
+* @param {org.example.empty.CreateContractShipper2Forwarder} tm
+
+ 
+
+* @transaction
+
+ 
+
+*/
+
+function transactionCreateContractShipper2Forwarder(tm){
+
+ 
+
+  var factory=getFactory();
+
+  var newRecord=factory.newResource('org.example.empty','Contract',tm.contract.contractID);
+
+  
+
+          
+
+newRecord.contractData=tm.contract.contractData;
+
+   newRecord.amount=tm.contract.amount;
+
+ 
+
+ 
+
+newRecord.timestamp =tm.contract.timestamp;
+
+  
+
+   //console.log(tm.shipper);
+
+   console.log(tm);
+
+  return getAssetRegistry('org.example.empty.Contract')
+
+  .then(function(registry){
+
+    registry.add(newRecord);
+
+  });
+
+}
+
+ 
+
+ 
+
+/**
+
+ 
+
+* Approve BillOfLading
+
+ 
+
+* @param {org.example.empty.ApproveBillOfLading} apl
+
+ 
+
+* @transaction
+
+ 
+
+*/
+
+function transactionApproveBillOfLading(apl){
+
+  console.log(apl);
+
+  var old_billOfLadingStatus=apl.billOfLading.billOfLadingStatus;
+
+   var shipper_status=apl.shipper.billOfLadingStatus;
+
+   var forwarder_status=apl.forwarder.billOfLadingStatus;
+
+   var bank_status=apl.bank.billOfLadingStatus;
+
+   var carrier_status=apl.carrier.billOfLadingStatus;
+
+   if(shipper_status == "approved" && forwarder_status == "approved" && bank_status == "approved" && carrier_status == "approved")
+
+   {
+
+     apl.billOfLading.billOfLadingStatus="approved";
+
+     console.log(apl);
+
+     return getAssetRegistry('org.example.empty.BillOfLading')
+
+  .then(function(registry){
+
+    registry.update(apl.billOfLading);
+
+  });
+
+   }
+
+  
+
+}
+
+/**
+
+ 
+
+* Create BillOfLAdingStatus
+
+ 
+
+* @param {org.example.empty.createBillOfLAdingStatus} mo
+
+ 
+
+* @transaction
+
+ 
+
+*/
+
+function transactioncreateBillOfLAdingStatus(mo){
+
+  console.log(mo);
+
+  var factory=getFactory();
+
+  var newRecord=factory.newResource('org.example.empty','StatusUpdate',mo.statusupdate.ID);
+
+  
+
+          
+
+newRecord.shipper_status=mo.statusupdate.shipper_status;
+
+newRecord.forwarder_status =mo.statusupdate.forwarder_status;
+
+newRecord.carrier_status =mo.statusupdate.carrier_status;
+
+newRecord.bank_status =mo.statusupdate.bank_status;
+
+ 
+
+  return getAssetRegistry('org.example.empty.StatusUpdate')
+
+  .then(function(registry){
+
+    registry.add(newRecord);
+
+  });
+
+ 
+
+}
+
+ 
+
+ 
+
+/**
+
+ 
+
+* Update BillOfLAdingStatus
+
+ 
+
+* @param {org.example.empty.updateBillOfLAdingStatus} mf
+
+ 
+
+* @transaction
+
+ 
+
+*/
+
+function transactionupdateBillOfLAdingStatus(mf){
+
+ 
+
+  
+
+  var status=mf.status;
+
+   console.log(mf.status);
+
+  
+
+    getParticipantRegistry('org.example.empty.Carrier')
+
+    .then(function(participantRegistry) {
+
+     return participantRegistry.exists(mf.carrier.ID);
+
+      })
+
+    .then(function(exists){
+
+     if(!exists) {
+
+     console.log("carrierfalse");
+
+    }else
+
+    {
+
+    mf.statusupdate.carrier_status=status;
+
+    }
+
+   })
+
+  
+
+    getParticipantRegistry('org.example.empty.Shipper')
+
+    .then(function(participantRegistry) {
+
+     return participantRegistry.exists(mf.shipper.ID);
+
+      })
+
+    .then(function(exists){
+
+     if(!exists) {
+
+     console.log("shipperfalse");
+
+    }else
+
+    {
+
+    mf.statusupdate.shipper_status=status;
+
+    }
+
+   })
+
+ 
+
+    getParticipantRegistry('org.example.empty.Bank')
+
+    .then(function(participantRegistry) {
+
+     return participantRegistry.exists(mf.bank.ID);
+
+      })
+
+    .then(function(exists){
+
+     if(!exists) {
+
+     console.log("bankfalse");
+
+    }else
+
+    {
+
+    mf.statusupdate.bank_status=status;
+
+    }
+
+   })
+
+    getParticipantRegistry('org.example.empty.FreightForwarder')
+
+    .then(function(participantRegistry) {
+
+     return participantRegistry.exists(mf.forwarder.ID);
+
+      })
+
+    .then(function(exists){
+
+     if(!exists) {
+
+     console.log("forwarderfalse");
+
+    }else
+
+    {
+
+     
+
+    mf.statusupdate.forwarder_status=status;
+
+    }
+
+   })
+
+ 
+
+    return getAssetRegistry('org.example.empty.StatusUpdate')
+
+   .then(function(registry){
+
+      
+
+    return registry.update(mf.statusupdate);
+
+      console.log(mf);
+
+  });
+
+     
+
+    
+
+   
+
+ 
+
+}
+
+ 
+
+ 
+
+ 
+
+/**
+
+ 
+
+* Create depositAmount
+
+ 
+
+* @param {org.example.empty.depositAmount} param
+
+ 
+
+* @transaction
+
+ 
+
+*/
+
+function transactioncreatedepositAmount(param){
+
+  console.log(param);
+
+// var factory=getFactory();
+
+  //var newRecord=factory.newResource('org.example.empty','Bank',param.bank.ID);
+
+  
+
+         var amount= param.contract.amount;
+
+param.bank.total_funds=amount;
+
+ 
+
+ 
+
+  return getParticipantRegistry('org.example.empty.Bank')
+
+  .then(function(registry){
+
+    registry.update(param.bank);
+
+  });
+
+ 
+
+}
+
+ 
+
+/**
+
+ 
+
+* Create payment
+
+ 
+
+* @param {org.example.empty.payment} oppo
+
+ 
+
+* @transaction
+
+ 
+
+*/
+
+function transactionpayment(oppo){
+
+  console.log(oppo);
+
+ 
+
+   var bank_funds=oppo.bank.total_funds;
+
+  var carrier_amount= oppo.billoflading.carrier_amount;
+
+   var forwarder_amount= oppo.billoflading.forwarder_amount;
+
+var remaining_funds=bank_funds-(carrier_amount+forwarder_amount);
+
+oppo.bank.total_funds=remaining_funds;
+
+  
+
+ 
+
+  return getParticipantRegistry('org.example.empty.Bank')
+
+  .then(function(registry){
+
+    registry.update(oppo.bank);
+
+  });
+
+ 
+
+}
